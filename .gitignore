@@ -1,0 +1,23 @@
+# Mac
+.DS_Store
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+# Node
+node_modules/
+
+# Logs / DB
+*.log
+*.sqlite
+*.sqlite3
+
+# Optional: ignore backend if heavy (remove later if you want)
+backend/venv/
+backend/__pycache__/

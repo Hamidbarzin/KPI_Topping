@@ -1,0 +1,1970 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Topping — KPI System</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #07090e;
+        --s1: #0c1018;
+        --s2: #111620;
+        --s3: #181f2e;
+        --s4: #1e2740;
+        --border: #1e2d45;
+        --border2: #253552;
+        --gold: #e5b94a;
+        --gold2: #f5d07a;
+        --teal: #00c8d7;
+        --teal2: #7eeef6;
+        --green: #1fd17a;
+        --blue: #4da3ff;
+        --purple: #b87ffc;
+        --red: #ff4d5e;
+        --amber: #ffb020;
+        --white: #eaf0ff;
+        --muted: #6b7a99;
+        --muted2: #4a5568;
+        --font: "Syne", sans-serif;
+        --fontfa: "Vazirmatn", sans-serif;
+        --mono: "JetBrains Mono", monospace;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--white);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* ── BG MESH ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 50% at 10% 0%,
+            rgba(0, 200, 215, 0.07) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 90% 100%,
+            rgba(184, 127, 252, 0.06) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse 50% 60% at 50% 40%,
+            rgba(229, 185, 74, 0.03) 0%,
+            transparent 55%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 28px 24px;
+      }
+
+      /* ═══════════════ LANDING / ROLE SELECT ═══════════════ */
+      #landing {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 48px;
+        padding: 40px 24px;
+      }
+
+      .brand {
+        text-align: center;
+      }
+      .brand-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 200, 215, 0.12),
+          rgba(229, 185, 74, 0.08)
+        );
+        border: 1px solid var(--border2);
+        border-radius: 100px;
+        padding: 8px 20px;
+        margin-bottom: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: var(--teal);
+        text-transform: uppercase;
+      }
+      .brand h1 {
+        font-size: clamp(40px, 6vw, 72px);
+        font-weight: 800;
+        letter-spacing: -2px;
+        line-height: 0.95;
+        background: linear-gradient(
+          135deg,
+          var(--white) 0%,
+          var(--teal) 50%,
+          var(--gold) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .brand p {
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      .role-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        width: 100%;
+        max-width: 900px;
+      }
+
+      .role-card {
+        position: relative;
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 28px 24px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        text-align: center;
+      }
+      .role-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          var(--card-color, var(--teal)) 18,
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .role-card:hover {
+        border-color: var(--card-color, var(--teal));
+        transform: translateY(-6px);
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.4),
+          0 0 0 1px var(--card-color, var(--teal));
+      }
+      .role-card:hover::before {
+        opacity: 1;
+      }
+
+      .role-icon {
+        font-size: 36px;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .role-name {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--card-color, var(--white));
+        margin-bottom: 4px;
+      }
+      .role-title {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .role-desc {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.6;
+        font-family: var(--fontfa);
+      }
+      .role-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--card-color, var(--teal));
+        color: #000;
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 16px;
+        transition: transform 0.2s;
+      }
+      .role-card:hover .role-arrow {
+        transform: scale(1.15);
+      }
+
+      .month-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .month-bar select {
+        background: transparent;
+        border: none;
+        color: var(--gold);
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        outline: none;
+      }
+      .month-bar select option {
+        background: var(--s2);
+      }
+
+      /* ═══════════════ APP SHELL ═══════════════ */
+      #app {
+        display: none;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 22px;
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin-bottom: 22px;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .back-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: var(--s3);
+        border: 1px solid var(--border2);
+        color: var(--muted);
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .back-btn:hover {
+        color: var(--white);
+        border-color: var(--teal);
+      }
+      .topbar-role {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .role-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--role-color, var(--teal));
+        box-shadow: 0 0 8px var(--role-color, var(--teal));
+      }
+      .role-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--white);
+      }
+      .role-sublabel {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .month-pill {
+        background: var(--s3);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 11px;
+        color: var(--gold);
+        font-weight: 700;
+        font-family: var(--mono);
+      }
+      .save-flash {
+        font-size: 11px;
+        color: var(--green);
+        display: none;
+        align-items: center;
+        gap: 4px;
+      }
+      .save-flash.on {
+        display: flex;
+      }
+
+      /* ── TABS ── */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 22px;
+        overflow-x: auto;
+      }
+      .tab {
+        flex: 1;
+        min-width: fit-content;
+        padding: 9px 14px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        font-family: var(--font);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .tab.active {
+        background: var(--s3);
+        color: var(--white);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      .tab:hover:not(.active) {
+        color: var(--white);
+      }
+
+      /* ═══════════════ SELF-ASSESSMENT VIEW ═══════════════ */
+      .kpi-card {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        transition: border-color 0.3s;
+      }
+      .kpi-card:hover {
+        border-color: var(--border2);
+      }
+
+      .kpi-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: linear-gradient(90deg, var(--s2), var(--s1));
+        border-bottom: 1px solid var(--border);
+      }
+      .kpi-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: var(--s3);
+        border: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        font-family: var(--mono);
+        flex-shrink: 0;
+      }
+      .kpi-names {
+        margin: 0 12px;
+        flex: 1;
+      }
+      .kpi-names h3 {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--white);
+        font-family: var(--fontfa);
+      }
+      .kpi-names p {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px;
+        font-family: var(--mono);
+      }
+
+      .star-row {
+        display: flex;
+        gap: 4px;
+      }
+      .star {
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--s4);
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .star:hover,
+      .star.on {
+        color: var(--gold);
+      }
+      .star:hover {
+        transform: scale(1.25);
+      }
+
+      .kpi-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+      .kpi-field {
+        padding: 14px 20px;
+        border-right: 1px solid var(--border);
+      }
+      .kpi-field:last-child {
+        border-right: none;
+      }
+      .kpi-field label {
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .kpi-field input,
+      .kpi-field textarea {
+        width: 100%;
+        background: var(--s2);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: var(--white);
+        font-family: var(--fontfa);
+        font-size: 12px;
+        outline: none;
+        transition: border-color 0.2s;
+        resize: none;
+      }
+      .kpi-field input:focus,
+      .kpi-field textarea:focus {
+        border-color: var(--teal);
+        box-shadow: 0 0 0 3px rgba(0, 200, 215, 0.08);
+      }
+      .kpi-field input::placeholder,
+      .kpi-field textarea::placeholder {
+        color: var(--muted2);
+      }
+
+      /* Member summary card header */
+      .member-summary {
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .ms-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 900;
+        color: #000;
+        font-family: var(--mono);
+        flex-shrink: 0;
+      }
+      .ms-info h2 {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .ms-info p {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .ms-score {
+        margin-right: auto;
+        text-align: center;
+      }
+      .ms-score-val {
+        font-size: 36px;
+        font-weight: 800;
+        font-family: var(--mono);
+        line-height: 1;
+      }
+      .ms-score-stars {
+        font-size: 14px;
+        color: var(--gold);
+        margin-top: 2px;
+      }
+      .ms-score-label {
+        font-size: 9px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* ── RADAR ── */
+      .radar-wrap {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 18px;
+      }
+      .radar-wrap h3 {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 14px;
+        color: var(--muted);
+      }
+      .radar-wrap canvas {
+        max-height: 240px;
+      }
+
+      /* ═══════════════ REPORT VIEW ═══════════════ */
+      .report-section {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+      .rs-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        background: var(--s2);
+        border-bottom: 1px solid var(--border);
+      }
+      .rs-icon {
+        font-size: 18px;
+      }
+      .rs-title {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .rs-sub {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px;
+        font-family: var(--fontfa);
+      }
+      .rs-body {
+        padding: 16px 20px;
+      }
+      .report-textarea {
+        width: 100%;
+        min-height: 100px;
+        background: var(--s2);
+        border: 1px solid var(--border2);
+        border-radius: 10px;
+        padding: 12px 14px;
+        color: var(--white);
+        font-family: var(--fontfa);
+        font-size: 12px;
+        line-height: 1.7;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+        direction: rtl;
+      }
+      .report-textarea:focus {
+        border-color: var(--teal);
+      }
+      .report-textarea::placeholder {
+        color: var(--muted2);
+      }
+
+      /* ═══════════════ CEO/MOTAB REVIEW ═══════════════ */
+      .review-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .review-member-card {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .rmc-head {
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+      }
+      .rmc-name {
+        font-size: 14px;
+        font-weight: 800;
+        font-family: var(--mono);
+      }
+      .rmc-avg {
+        font-size: 22px;
+        font-weight: 800;
+        font-family: var(--mono);
+        color: var(--gold);
+      }
+      .rmc-body {
+        padding: 14px 16px;
+      }
+
+      /* self score vs reviewer */
+      .score-compare {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        background: var(--s2);
+        border-radius: 10px;
+      }
+      .sc-item {
+        text-align: center;
+        flex: 1;
+      }
+      .sc-val {
+        font-size: 18px;
+        font-weight: 800;
+        font-family: var(--mono);
+      }
+      .sc-label {
+        font-size: 9px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+      }
+      .sc-div {
+        width: 1px;
+        height: 36px;
+        background: var(--border);
+      }
+      .sc-diff {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 20px;
+      }
+      .sc-diff.pos {
+        background: rgba(31, 209, 122, 0.12);
+        color: var(--green);
+      }
+      .sc-diff.neg {
+        background: rgba(255, 77, 94, 0.12);
+        color: var(--red);
+      }
+      .sc-diff.neu {
+        background: var(--s3);
+        color: var(--muted);
+      }
+
+      .reviewer-stars {
+        margin-bottom: 10px;
+      }
+      .reviewer-stars label {
+        font-size: 9px;
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .reviewer-textarea {
+        width: 100%;
+        min-height: 70px;
+        background: var(--s2);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        padding: 9px 12px;
+        color: var(--white);
+        font-family: var(--fontfa);
+        font-size: 11px;
+        line-height: 1.6;
+        resize: none;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .reviewer-textarea:focus {
+        border-color: var(--gold);
+      }
+      .reviewer-textarea::placeholder {
+        color: var(--muted2);
+      }
+
+      /* ═══════════════ HISTORY VIEW ═══════════════ */
+      .history-wrap {
+        background: var(--s1);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .history-wrap table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .history-wrap th {
+        padding: 12px 16px;
+        background: var(--s2);
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+      }
+      .history-wrap td {
+        padding: 12px 16px;
+        font-size: 12px;
+        border-bottom: 1px solid rgba(30, 45, 69, 0.4);
+        text-align: center;
+        font-family: var(--mono);
+      }
+      .history-wrap tr:hover td {
+        background: rgba(255, 255, 255, 0.015);
+      }
+      .history-wrap tr:last-child td {
+        border-bottom: none;
+      }
+      .trend-up {
+        color: var(--green);
+      }
+      .trend-dn {
+        color: var(--red);
+      }
+      .trend-fl {
+        color: var(--muted);
+      }
+
+      /* ═══════════════ UTILS ═══════════════ */
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .section-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .btn {
+        padding: 9px 18px;
+        border-radius: 9px;
+        border: none;
+        font-family: var(--font);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-teal {
+        background: var(--teal);
+        color: #000;
+      }
+      .btn-teal:hover {
+        filter: brightness(1.15);
+      }
+      .btn-ghost {
+        background: var(--s3);
+        color: var(--white);
+        border: 1px solid var(--border2);
+      }
+      .btn-ghost:hover {
+        border-color: var(--teal);
+        color: var(--teal);
+      }
+      .btn-gold {
+        background: linear-gradient(135deg, var(--gold), #c9902a);
+        color: #000;
+      }
+      .btn-gold:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .badge-ex {
+        background: rgba(0, 200, 215, 0.12);
+        color: var(--teal);
+        border: 1px solid rgba(0, 200, 215, 0.2);
+      }
+      .badge-good {
+        background: rgba(31, 209, 122, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(31, 209, 122, 0.2);
+      }
+      .badge-avg {
+        background: rgba(255, 176, 32, 0.1);
+        color: var(--amber);
+        border: 1px solid rgba(255, 176, 32, 0.2);
+      }
+      .badge-low {
+        background: rgba(255, 77, 94, 0.1);
+        color: var(--red);
+        border: 1px solid rgba(255, 77, 94, 0.2);
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in {
+        animation: fadeUp 0.4s ease forwards;
+      }
+      .fade-in:nth-child(1) {
+        animation-delay: 0.03s;
+      }
+      .fade-in:nth-child(2) {
+        animation-delay: 0.07s;
+      }
+      .fade-in:nth-child(3) {
+        animation-delay: 0.11s;
+      }
+      .fade-in:nth-child(4) {
+        animation-delay: 0.15s;
+      }
+      .fade-in:nth-child(5) {
+        animation-delay: 0.19s;
+      }
+
+      @media print {
+        #landing {
+          display: none !important;
+        }
+        .topbar,
+        .tabs,
+        .back-btn,
+        .btn {
+          display: none !important;
+        }
+        body {
+          background: white;
+          color: black;
+        }
+        .kpi-card,
+        .report-section,
+        .review-member-card {
+          border: 1px solid #ccc;
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════ LANDING ═══════════════ -->
+    <div id="landing">
+      <div class="brand">
+        <div class="brand-badge">🏢 Topping Group · Node West</div>
+        <h1>KPI<br />SYSTEM</h1>
+        <p>Monthly Performance Review · <span id="currentMonthLabel"></span></p>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          justify-content: center;
+        "
+      >
+        <span style="font-size: 12px; color: var(--muted); font-weight: 600"
+          >PERIOD:</span
+        >
+        <div class="month-bar">
+          <span>📅</span>
+          <select id="globalMonth" onchange="setGlobalMonth(this.value)">
+            <option value="2024-11">November 2024</option>
+            <option value="2024-12">December 2024</option>
+            <option value="2025-01">January 2025</option>
+            <option value="2025-02">February 2025</option>
+            <option value="2025-03" selected>March 2025</option>
+            <option value="2025-04">April 2025</option>
+            <option value="2025-05">May 2025</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="role-cards">
+        <div
+          class="role-card"
+          style="--card-color: var(--green)"
+          onclick="openRole('arian')"
+        >
+          <span class="role-icon">📈</span>
+          <div class="role-name">ARIAN</div>
+          <div class="role-title">Head of Growth & Revenue</div>
+          <div class="role-desc">
+            ثبت خودارزیابی KPI، گزارش ماهانه و درخواست از تیم مدیریت
+          </div>
+          <div class="role-arrow">→</div>
+        </div>
+        <div
+          class="role-card"
+          style="--card-color: var(--blue)"
+          onclick="openRole('shayan')"
+        >
+          <span class="role-icon">📣</span>
+          <div class="role-name">SHAYAN</div>
+          <div class="role-title">Head of Marketing & Acquisition</div>
+          <div class="role-desc">
+            ثبت خودارزیابی KPI، گزارش ماهانه و درخواست از تیم مدیریت
+          </div>
+          <div class="role-arrow">→</div>
+        </div>
+        <div
+          class="role-card"
+          style="--card-color: var(--purple)"
+          onclick="openRole('amir')"
+        >
+          <span class="role-icon">⚙️</span>
+          <div class="role-name">AMIR</div>
+          <div class="role-title">Head of Technology & Systems</div>
+          <div class="role-desc">
+            ثبت خودارزیابی KPI، گزارش ماهانه و درخواست از تیم مدیریت
+          </div>
+          <div class="role-arrow">→</div>
+        </div>
+        <div
+          class="role-card"
+          style="--card-color: var(--gold)"
+          onclick="openRole('hamid')"
+        >
+          <span class="role-icon">👑</span>
+          <div class="role-name">HAMID</div>
+          <div class="role-title">Founder & CEO</div>
+          <div class="role-desc">
+            مشاهده گزارش‌ها، امتیازدهی به مدیران و ثبت نظر راهبردی
+          </div>
+          <div class="role-arrow">→</div>
+        </div>
+        <div
+          class="role-card"
+          style="--card-color: var(--teal)"
+          onclick="openRole('motab')"
+        >
+          <span class="role-icon">🧭</span>
+          <div class="role-name">MOTAB</div>
+          <div class="role-title">Business Coach & Strategic Advisor</div>
+          <div class="role-desc">
+            نظارت استراتژیک، ارزیابی مدیران و ثبت بازخورد راهبردی
+          </div>
+          <div class="role-arrow">→</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ APP ═══════════════ -->
+    <div id="app">
+      <div class="wrap">
+        <!-- TOP BAR -->
+        <div class="topbar">
+          <div class="topbar-left">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <div class="topbar-role">
+              <div class="role-dot" id="topDot"></div>
+              <div>
+                <div class="role-label" id="topName"></div>
+                <div class="role-sublabel" id="topTitle"></div>
+              </div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <div class="save-flash" id="saveFlash">✓ Saved</div>
+            <div class="month-pill" id="topMonth"></div>
+            <button class="btn btn-ghost" onclick="window.print()">
+              🖨 Print
+            </button>
+          </div>
+        </div>
+
+        <!-- TABS (dynamic) -->
+        <div class="tabs" id="tabBar"></div>
+
+        <!-- VIEWS -->
+        <div id="viewContainer"></div>
+      </div>
+    </div>
+
+    <script>
+      /* ═══════════════ DATA ═══════════════ */
+      const API_BASE = "http://localhost:4000";
+
+      const MEMBERS = {
+        arian: {
+          id: "arian",
+          name: "ARIAN",
+          title: "Head of Growth & Revenue",
+          color: "#1FD17A",
+          icon: "📈",
+          kpis: [
+            { fa: "تعداد لید دریافتی", en: "Lead Count", unit: "leads" },
+            { fa: "نرخ تبدیل لید → مشتری", en: "Conversion Rate", unit: "%" },
+            { fa: "درآمد ماهیانه", en: "Monthly Revenue", unit: "K CAD" },
+            {
+              fa: "تعداد پارتنرشیپ B2B",
+              en: "B2B Partnerships",
+              unit: "deals",
+            },
+            { fa: "دستیابی به OKR", en: "OKR Achievement", unit: "%" },
+          ],
+        },
+        shayan: {
+          id: "shayan",
+          name: "SHAYAN",
+          title: "Head of Marketing & Acquisition",
+          color: "#4DA3FF",
+          icon: "📣",
+          kpis: [
+            { fa: "هزینه لید (CAC)", en: "Cost per Lead", unit: "CAD" },
+            { fa: "ترافیک ماهیانه", en: "Website Traffic", unit: "K visits" },
+            { fa: "نرخ کلیک (CTR)", en: "Click-Through Rate", unit: "%" },
+            {
+              fa: "تعداد کمپین اجراشده",
+              en: "Campaigns Run",
+              unit: "campaigns",
+            },
+            { fa: "امتیاز برند / رضایت", en: "Brand Score", unit: "/5" },
+          ],
+        },
+        amir: {
+          id: "amir",
+          name: "AMIR",
+          title: "Head of Technology & Systems",
+          color: "#B87FFC",
+          icon: "⚙️",
+          kpis: [
+            { fa: "آپتایم سیستم", en: "System Uptime", unit: "%" },
+            { fa: "تعداد باگ حل‌شده", en: "Bugs Resolved", unit: "bugs" },
+            {
+              fa: "سرعت دلیوری فیچر",
+              en: "Feature Delivery",
+              unit: "days/feat",
+            },
+            {
+              fa: "اتوماسیون‌های پیاده‌شده",
+              en: "Automations Built",
+              unit: "items",
+            },
+            { fa: "دقت گزارش‌ها", en: "Report Accuracy", unit: "%" },
+          ],
+        },
+      };
+
+      const MONTHS = [
+        "2024-11",
+        "2024-12",
+        "2025-01",
+        "2025-02",
+        "2025-03",
+        "2025-04",
+        "2025-05",
+      ];
+      const MONTH_LABELS = {
+        "2024-11": "November 2024",
+        "2024-12": "December 2024",
+        "2025-01": "January 2025",
+        "2025-02": "February 2025",
+        "2025-03": "March 2025",
+        "2025-04": "April 2025",
+        "2025-05": "May 2025",
+      };
+
+      // Seed historical data for past months
+      const SEED = {
+        "2024-11": {
+          arian: [4, 3, 3, 2, 4],
+          shayan: [3, 4, 3, 3, 4],
+          amir: [5, 4, 3, 4, 3],
+        },
+        "2024-12": {
+          arian: [4, 4, 4, 3, 4],
+          shayan: [4, 3, 4, 4, 4],
+          amir: [5, 5, 4, 4, 4],
+        },
+        "2025-01": {
+          arian: [3, 4, 3, 3, 3],
+          shayan: [4, 4, 3, 3, 3],
+          amir: [4, 4, 4, 5, 4],
+        },
+        "2025-02": {
+          arian: [5, 4, 4, 4, 4],
+          shayan: [4, 4, 4, 4, 5],
+          amir: [5, 4, 4, 4, 5],
+        },
+      };
+
+      let state = {};
+      let currentRole = null;
+      let currentMonth = "2025-03";
+      let radarChart = null;
+      let teamRadar = null;
+      let activeTab = null;
+
+      function initState() {
+        MONTHS.forEach((m) => {
+          state[m] = state[m] || {};
+          ["arian", "shayan", "amir"].forEach((mid) => {
+            state[m][mid] = state[m][mid] || {
+              selfStars: [0, 0, 0, 0, 0],
+              targets: ["", "", "", "", ""],
+              actuals: ["", "", "", "", ""],
+              report: {
+                achievements: "",
+                challenges: "",
+                nextMonth: "",
+                requests: "",
+              },
+              reviewHamid: { stars: [0, 0, 0, 0, 0], comment: "" },
+              reviewMotab: { stars: [0, 0, 0, 0, 0], comment: "" },
+            };
+            // Seed
+            if (SEED[m] && !state[m][mid].selfStars.some((s) => s > 0)) {
+              state[m][mid].selfStars = [...SEED[m][mid]];
+              state[m][mid].targets = ["—", "—", "—", "—", "—"];
+              state[m][mid].actuals = ["—", "—", "—", "—", "—"];
+            }
+          });
+        });
+      }
+      async function saveStorage() {
+        if (!currentRole) return;
+        const f = document.getElementById("saveFlash");
+        try {
+          const payload = state[currentMonth][currentRole];
+          await fetch(`${API_BASE}/api/kpi/${currentMonth}/${currentRole}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload || {}),
+          });
+        } catch (e) {
+          console.error("Failed to save KPI data", e);
+        }
+        if (f) {
+          f.classList.add("on");
+          setTimeout(() => f.classList.remove("on"), 1800);
+        }
+      }
+
+      let saveTimer;
+      function autoSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          saveStorage();
+        }, 700);
+      }
+
+      /* ═══════════════ NAVIGATION ═══════════════ */
+      function setGlobalMonth(v) {
+        currentMonth = v;
+        document.getElementById("currentMonthLabel").textContent =
+          MONTH_LABELS[v];
+      }
+
+      async function openRole(role) {
+        currentRole = role;
+        document.getElementById("landing").style.display = "none";
+        document.getElementById("app").style.display = "block";
+
+        const info =
+          role === "hamid"
+            ? { name: "HAMID", title: "Founder & CEO", color: "#E5B94A" }
+            : role === "motab"
+              ? { name: "MOTAB", title: "Strategic Advisor", color: "#00C8D7" }
+              : { ...MEMBERS[role], color: MEMBERS[role].color };
+
+        document
+          .getElementById("topDot")
+          .style.setProperty("--role-color", info.color);
+        document.getElementById("topDot").style.background = info.color;
+        document.getElementById("topDot").style.boxShadow =
+          `0 0 8px ${info.color}`;
+        document.getElementById("topName").textContent = info.name;
+        document.getElementById("topTitle").textContent = info.title;
+        document.getElementById("topMonth").textContent =
+          MONTH_LABELS[currentMonth];
+
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/kpi/${currentMonth}/${role}`,
+          );
+          if (res.ok) {
+            const json = await res.json();
+            if (json && json.ok && json.data) {
+              state[currentMonth][role] = {
+                ...state[currentMonth][role],
+                ...json.data,
+              };
+            }
+          }
+        } catch (e) {
+          console.error("Failed to load KPI data", e);
+        }
+
+        buildTabs(role);
+      }
+
+      function goBack() {
+        document.getElementById("landing").style.display = "flex";
+        document.getElementById("app").style.display = "none";
+        if (radarChart) {
+          radarChart.destroy();
+          radarChart = null;
+        }
+        if (teamRadar) {
+          teamRadar.destroy();
+          teamRadar = null;
+        }
+      }
+
+      function buildTabs(role) {
+        const bar = document.getElementById("tabBar");
+        bar.innerHTML = "";
+        let tabs = [];
+
+        if (["arian", "shayan", "amir"].includes(role)) {
+          tabs = [
+            { id: "self", label: "⭐ Self-Assessment" },
+            { id: "report", label: "📋 Monthly Report" },
+            { id: "radar", label: "📡 My Radar" },
+          ];
+        } else {
+          tabs = [
+            { id: "review", label: "🔍 Review Team" },
+            { id: "comparison", label: "📊 Comparison" },
+            { id: "history", label: "🕐 History" },
+          ];
+        }
+
+        tabs.forEach((t, i) => {
+          const btn = document.createElement("button");
+          btn.className = "tab" + (i === 0 ? " active" : "");
+          btn.textContent = t.label;
+          btn.onclick = () => {
+            document
+              .querySelectorAll(".tab")
+              .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            showView(t.id);
+          };
+          bar.appendChild(btn);
+        });
+
+        showView(tabs[0].id);
+      }
+
+      function showView(id) {
+        activeTab = id;
+        if (radarChart) {
+          radarChart.destroy();
+          radarChart = null;
+        }
+        if (teamRadar) {
+          teamRadar.destroy();
+          teamRadar = null;
+        }
+
+        const vc = document.getElementById("viewContainer");
+        vc.innerHTML = "";
+
+        if (id === "self") renderSelf(vc);
+        if (id === "report") renderReport(vc);
+        if (id === "radar") renderMyRadar(vc);
+        if (id === "review") renderReview(vc);
+        if (id === "comparison") renderComparison(vc);
+        if (id === "history") renderHistory(vc);
+      }
+
+      /* ═══════════════ SELF-ASSESSMENT ═══════════════ */
+      function renderSelf(container) {
+        const mem = MEMBERS[currentRole];
+        const d = state[currentMonth][currentRole];
+        const avg = calcAvg(d.selfStars);
+        const color = mem.color;
+
+        container.innerHTML = `
+    <div class="member-summary fade-in">
+      <div class="ms-avatar" style="background:${color}22;border:2px solid ${color}44;color:${color}">
+        ${mem.name[0]}
+      </div>
+      <div class="ms-info">
+        <h2 style="color:${color}">${mem.name}</h2>
+        <p>${mem.title}</p>
+        <div style="margin-top:8px">${getBadge(avg)}</div>
+      </div>
+      <div class="ms-score">
+        <div class="ms-score-val" style="color:var(--gold)" id="avgDisplay">${avg > 0 ? avg.toFixed(1) : "—"}</div>
+        <div class="ms-score-stars" id="avgStars">${starsStr(Math.round(avg))}</div>
+        <div class="ms-score-label">Self Avg</div>
+      </div>
+    </div>
+
+    <div class="section-label">KPI Self-Assessment — ${MONTH_LABELS[currentMonth]}</div>
+
+    ${mem.kpis
+      .map(
+        (kpi, i) => `
+      <div class="kpi-card fade-in" style="animation-delay:${i * 0.06}s">
+        <div class="kpi-card-header">
+          <div class="kpi-num">${i + 1}</div>
+          <div class="kpi-names">
+            <h3>${kpi.fa}</h3>
+            <p>${kpi.en} · ${kpi.unit}</p>
+          </div>
+          <div class="star-row" id="selfStars-${i}">
+            ${[1, 2, 3, 4, 5]
+              .map(
+                (s) => `
+              <span class="star ${d.selfStars[i] >= s ? "on" : ""}"
+                onclick="setSelfStar(${i},${s})"
+                onmouseover="hoverStar('selfStars-${i}',${s})"
+                onmouseout="unhoverStar('selfStars-${i}',${i})">★</span>
+            `,
+              )
+              .join("")}
+          </div>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-field">
+            <label>Monthly Target</label>
+            <input type="text" placeholder="e.g. 150 leads"
+              value="${d.targets[i]}"
+              oninput="updateTarget(${i},this.value)">
+          </div>
+          <div class="kpi-field" style="border-right:none">
+            <label>Actual Result</label>
+            <input type="text" placeholder="e.g. 162 leads"
+              value="${d.actuals[i]}"
+              oninput="updateActual(${i},this.value)">
+          </div>
+        </div>
+      </div>
+    `,
+      )
+      .join("")}
+  `;
+      }
+
+      function setSelfStar(ki, val) {
+        state[currentMonth][currentRole].selfStars[ki] = val;
+        refreshStarRow(`selfStars-${ki}`, val);
+        const avg = calcAvg(state[currentMonth][currentRole].selfStars);
+        const d = document.getElementById("avgDisplay");
+        const s = document.getElementById("avgStars");
+        if (d) d.textContent = avg > 0 ? avg.toFixed(1) : "—";
+        if (s) s.textContent = starsStr(Math.round(avg));
+        autoSave();
+      }
+
+      function updateTarget(ki, v) {
+        state[currentMonth][currentRole].targets[ki] = v;
+        autoSave();
+      }
+
+      function updateActual(ki, v) {
+        state[currentMonth][currentRole].actuals[ki] = v;
+        autoSave();
+      }
+
+      function hoverStar(rowId, val) {
+        document.querySelectorAll(`#${rowId} .star`).forEach((s, i) => {
+          s.style.color = i < val ? "#E5B94A" : "";
+        });
+      }
+
+      function unhoverStar(rowId, ki) {
+        const cur = state[currentMonth][currentRole].selfStars[ki];
+        refreshStarRow(rowId, cur);
+      }
+
+      function refreshStarRow(rowId, val) {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        row.querySelectorAll(".star").forEach((s, i) => {
+          s.style.color = "";
+          s.classList.toggle("on", i < val);
+        });
+      }
+
+      /* ═══════════════ REPORT VIEW ═══════════════ */
+      function renderReport(container) {
+        const d = state[currentMonth][currentRole];
+        const r = d.report;
+
+        const sections = [
+          {
+            icon: "🏆",
+            title: "Achievements this Month",
+            sub: "چه کارهایی انجام دادی؟",
+            key: "achievements",
+            ph: "Describe your key wins, milestones reached, and goals achieved this month...",
+          },
+          {
+            icon: "⚠️",
+            title: "Challenges & Blockers",
+            sub: "چه موانعی داشتی؟",
+            key: "challenges",
+            ph: "What slowed you down? What needs support from leadership?",
+          },
+          {
+            icon: "🎯",
+            title: "Plan for Next Month",
+            sub: "برنامه ماه بعد",
+            key: "nextMonth",
+            ph: "Your goals, priorities, and commitments for next month...",
+          },
+          {
+            icon: "📮",
+            title: "Requests from CEO / Motab",
+            sub: "درخواست یا نیاز به تصمیم از مدیریت",
+            key: "requests",
+            ph: "Any decisions, resources, or support you need from Hamid or Motab...",
+          },
+        ];
+
+        container.innerHTML = `
+    <div class="section-label">Monthly Report — ${MONTH_LABELS[currentMonth]}</div>
+    ${sections
+      .map(
+        (s, i) => `
+      <div class="report-section fade-in" style="animation-delay:${i * 0.08}s">
+        <div class="rs-header">
+          <span class="rs-icon">${s.icon}</span>
+          <div>
+            <div class="rs-title">${s.title}</div>
+            <div class="rs-sub">${s.sub}</div>
+          </div>
+        </div>
+        <div class="rs-body">
+          <textarea class="report-textarea" placeholder="${s.ph}"
+            oninput="updateReport('${s.key}',this.value)">${r[s.key] || ""}</textarea>
+        </div>
+      </div>
+    `,
+      )
+      .join("")}
+  `;
+      }
+
+      function updateReport(key, val) {
+        state[currentMonth][currentRole].report[key] = val;
+        autoSave();
+      }
+
+      /* ═══════════════ MY RADAR ═══════════════ */
+      function renderMyRadar(container) {
+        const mem = MEMBERS[currentRole];
+        const stars = state[currentMonth][currentRole].selfStars;
+
+        container.innerHTML = `
+    <div class="radar-wrap fade-in">
+      <h3>Performance Radar — ${mem.name} · ${MONTH_LABELS[currentMonth]}</h3>
+      <canvas id="myRadarCanvas"></canvas>
+    </div>
+  `;
+
+        setTimeout(() => {
+          const ctx = document.getElementById("myRadarCanvas").getContext("2d");
+          radarChart = new Chart(ctx, {
+            type: "radar",
+            data: {
+              labels: mem.kpis.map((k) => k.en),
+              datasets: [
+                {
+                  label: mem.name,
+                  data: stars.map((s) => s || 0),
+                  backgroundColor: mem.color + "25",
+                  borderColor: mem.color,
+                  borderWidth: 2.5,
+                  pointBackgroundColor: mem.color,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: {
+                r: {
+                  min: 0,
+                  max: 5,
+                  ticks: { display: false, stepSize: 1 },
+                  grid: { color: "rgba(255,255,255,0.06)" },
+                  angleLines: { color: "rgba(255,255,255,0.08)" },
+                  pointLabels: {
+                    color: "#6B7A99",
+                    font: { family: "Syne", size: 11, weight: "600" },
+                  },
+                },
+              },
+            },
+          });
+        }, 50);
+      }
+
+      /* ═══════════════ REVIEW (CEO/MOTAB) ═══════════════ */
+      function renderReview(container) {
+        const reviewerKey =
+          currentRole === "hamid" ? "reviewHamid" : "reviewMotab";
+        const reviewerLabel =
+          currentRole === "hamid" ? "Hamid (CEO)" : "Motab (Strategic Advisor)";
+
+        container.innerHTML = `
+    <div class="section-label">Team Review — ${reviewerLabel} · ${MONTH_LABELS[currentMonth]}</div>
+    <div class="review-grid" id="reviewGrid"></div>
+  `;
+
+        const grid = document.getElementById("reviewGrid");
+
+        Object.values(MEMBERS).forEach((mem, mi) => {
+          const d = state[currentMonth][mem.id];
+          const selfAvg = calcAvg(d.selfStars);
+          const rv = d[reviewerKey];
+          const revAvg = calcAvg(rv.stars);
+          const diff = revAvg - selfAvg;
+
+          const card = document.createElement("div");
+          card.className = "review-member-card fade-in";
+          card.style.animationDelay = `${mi * 0.08}s`;
+          card.innerHTML = `
+      <div class="rmc-head" style="background:${mem.color}12;border-bottom:1px solid ${mem.color}22">
+        <div>
+          <div class="rmc-name" style="color:${mem.color}">${mem.name}</div>
+          <div style="font-size:10px;color:var(--muted)">${mem.title}</div>
+          <div style="margin-top:5px">${getBadge(revAvg)}</div>
+        </div>
+        <div style="text-align:center">
+          <div class="rmc-avg">${revAvg > 0 ? revAvg.toFixed(1) : "—"}</div>
+          <div style="font-size:10px;color:var(--muted)">Your Rating</div>
+        </div>
+      </div>
+      <div class="rmc-body">
+
+        <!-- Report Snapshot -->
+        ${
+          d.report.achievements
+            ? `
+          <div style="background:var(--s2);border-radius:8px;padding:10px 12px;margin-bottom:12px;border-left:2px solid ${mem.color};">
+            <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px">🏆 Achievements (Manager's Report)</div>
+            <div style="font-size:11px;color:var(--white);font-family:var(--fontfa);line-height:1.6;direction:rtl">${d.report.achievements.substring(0, 200)}${d.report.achievements.length > 200 ? "…" : ""}</div>
+          </div>`
+            : `
+          <div style="background:var(--s2);border-radius:8px;padding:10px 12px;margin-bottom:12px;text-align:center;color:var(--muted);font-size:11px;">
+            No report submitted yet
+          </div>`
+        }
+
+        ${
+          d.report.requests
+            ? `
+          <div style="background:rgba(229,185,74,0.06);border:1px solid rgba(229,185,74,0.15);border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+            <div style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px">📮 Request from Manager</div>
+            <div style="font-size:11px;color:var(--white);font-family:var(--fontfa);line-height:1.6;direction:rtl">${d.report.requests.substring(0, 150)}${d.report.requests.length > 150 ? "…" : ""}</div>
+          </div>`
+            : ""
+        }
+
+        <!-- Score Compare -->
+        <div class="score-compare">
+          <div class="sc-item">
+            <div class="sc-val" style="color:${mem.color}">${selfAvg > 0 ? selfAvg.toFixed(1) : "—"}</div>
+            <div class="sc-label">Self</div>
+          </div>
+          <div class="sc-div"></div>
+          <div class="sc-item">
+            <div class="sc-val" style="color:var(--gold)">${revAvg > 0 ? revAvg.toFixed(1) : "—"}</div>
+            <div class="sc-label">Your Rating</div>
+          </div>
+          <div class="sc-div"></div>
+          <div class="sc-item">
+            <div class="sc-diff ${diff > 0.2 ? "pos" : diff < -0.2 ? "neg" : "neu"}">
+              ${diff > 0 ? "+" : ""}${revAvg > 0 && selfAvg > 0 ? diff.toFixed(1) : "—"}
+            </div>
+            <div class="sc-label">Gap</div>
+          </div>
+        </div>
+
+        <!-- Reviewer Stars per KPI -->
+        <div class="reviewer-stars">
+          <label>Your Rating per KPI</label>
+          ${mem.kpis
+            .map(
+              (kpi, ki) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:10px;color:var(--muted);font-family:var(--fontfa)">${kpi.fa}</span>
+              <div style="display:flex;gap:2px" id="rv-${mem.id}-${ki}">
+                ${[1, 2, 3, 4, 5]
+                  .map(
+                    (s) => `
+                  <span style="font-size:15px;cursor:pointer;color:${rv.stars[ki] >= s ? "#E5B94A" : "var(--s4)"};transition:all 0.15s;"
+                    onclick="setReviewStar('${mem.id}','${reviewerKey}',${ki},${s})"
+                    onmouseover="hoverRevStar('${mem.id}',${ki},${s})"
+                    onmouseout="unhoverRevStar('${mem.id}','${reviewerKey}',${ki})">★</span>
+                `,
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+
+        <!-- Comment -->
+        <textarea class="reviewer-textarea"
+          placeholder="Strategic feedback, observations, action items for ${mem.name}..."
+          oninput="updateReviewComment('${mem.id}','${reviewerKey}',this.value)">${rv.comment}</textarea>
+      </div>
+    `;
+          grid.appendChild(card);
+        });
+      }
+
+      function setReviewStar(mid, rKey, ki, val) {
+        state[currentMonth][mid][rKey].stars[ki] = val;
+        refreshRevStars(mid, rKey, ki, val);
+        autoSave();
+        // refresh avg in header
+        renderReview(document.getElementById("viewContainer"));
+      }
+
+      function refreshRevStars(mid, rKey, ki, val) {
+        const row = document.getElementById(`rv-${mid}-${ki}`);
+        if (!row) return;
+        row.querySelectorAll("span").forEach((s, i) => {
+          s.style.color = i < val ? "#E5B94A" : "";
+        });
+      }
+
+      function hoverRevStar(mid, ki, val) {
+        const row = document.getElementById(`rv-${mid}-${ki}`);
+        if (row)
+          row.querySelectorAll("span").forEach((s, i) => {
+            s.style.color = i < val ? "#E5B94A" : "";
+          });
+      }
+
+      function unhoverRevStar(mid, rKey, ki) {
+        const val = state[currentMonth][mid][rKey].stars[ki];
+        const row = document.getElementById(`rv-${mid}-${ki}`);
+        if (row)
+          row.querySelectorAll("span").forEach((s, i) => {
+            s.style.color = i < val ? "#E5B94A" : "var(--s4)";
+          });
+      }
+
+      function updateReviewComment(mid, rKey, val) {
+        state[currentMonth][mid][rKey].comment = val;
+        autoSave();
+      }
+
+      /* ═══════════════ COMPARISON ═══════════════ */
+      function renderComparison(container) {
+        const rKey = currentRole === "hamid" ? "reviewHamid" : "reviewMotab";
+        const mems = Object.values(MEMBERS);
+
+        const selfAvgs = mems.map((m) =>
+          calcAvg(state[currentMonth][m.id].selfStars),
+        );
+        const revAvgs = mems.map((m) =>
+          calcAvg(state[currentMonth][m.id][rKey].stars),
+        );
+        const teamSelf = avg(selfAvgs.filter((a) => a > 0));
+        const teamRev = avg(revAvgs.filter((a) => a > 0));
+
+        // Sorted ranking
+        const ranked = mems
+          .map((m, i) => ({ ...m, rev: revAvgs[i], self: selfAvgs[i] }))
+          .sort((a, b) => b.rev - a.rev);
+
+        container.innerHTML = `
+    <div class="grid2" style="margin-bottom:18px">
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <h3 style="font-size:13px;color:var(--muted);margin-bottom:14px">Team Radar — ${MONTH_LABELS[currentMonth]}</h3>
+        <canvas id="teamRadarCanvas" style="max-height:260px"></canvas>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px">
+        <h3 style="font-size:13px;color:var(--muted);margin-bottom:14px">🏅 Team Ranking</h3>
+        ${ranked
+          .map(
+            (m, i) => `
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:${i < 2 ? "1px solid var(--border)" : "none"}">
+            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;font-family:var(--mono);background:${["var(--gold)", "var(--muted)", "#8B6040"][i]};color:${i === 0 ? "#000" : i === 1 ? "#000" : "#fff"}">${i + 1}</div>
+            <div style="min-width:70px">
+              <div style="font-weight:800;font-size:13px;color:${m.color};font-family:var(--mono)">${m.name}</div>
+              <div style="font-size:9px;color:var(--muted)">${m.title.split(" ").slice(0, 3).join(" ")}</div>
+            </div>
+            <div style="flex:1;background:var(--border);border-radius:4px;height:5px;margin:0 6px">
+              <div style="height:5px;border-radius:4px;width:${m.rev > 0 ? (m.rev / 5) * 100 : 0}%;background:${m.color};transition:width 1s ease"></div>
+            </div>
+            <div style="font-family:var(--mono);font-weight:800;color:var(--gold);font-size:15px;min-width:36px;text-align:right">${m.rev > 0 ? m.rev.toFixed(1) : "—"}</div>
+          </div>
+        `,
+          )
+          .join("")}
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;color:var(--muted);font-weight:600">Team Average</span>
+          <span style="font-family:var(--mono);font-weight:800;font-size:17px;color:var(--gold)">${teamRev > 0 ? teamRev.toFixed(1) : "—"}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Self vs Reviewer comparison table -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden">
+      <div style="padding:14px 20px;background:var(--s2);border-bottom:1px solid var(--border);font-size:13px;font-weight:700">
+        Self-Score vs Your Rating — Side by Side
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="padding:10px 16px;background:var(--s2);font-size:10px;color:var(--muted);text-align:right;border-bottom:1px solid var(--border)">Member</th>
+            ${mems.map((m) => `<th style="padding:10px 16px;background:var(--s2);font-size:10px;color:${m.color};text-align:center;border-bottom:1px solid var(--border)">${m.name}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:10px 16px;font-size:11px;color:var(--muted);font-weight:600">Self Rating</td>
+            ${selfAvgs.map((a, i) => `<td style="padding:10px 16px;text-align:center;font-family:var(--mono);font-weight:700;color:${MEMBERS[mems[i].id].color}">${a > 0 ? a.toFixed(1) : "—"}</td>`).join("")}
+          </tr>
+          <tr>
+            <td style="padding:10px 16px;font-size:11px;color:var(--muted);font-weight:600">Your Rating</td>
+            ${revAvgs.map((a) => `<td style="padding:10px 16px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--gold)">${a > 0 ? a.toFixed(1) : "—"}</td>`).join("")}
+          </tr>
+          <tr>
+            <td style="padding:10px 16px;font-size:11px;color:var(--muted);font-weight:600">Gap</td>
+            ${mems
+              .map((m, i) => {
+                const diff = revAvgs[i] - selfAvgs[i];
+                const ok = selfAvgs[i] > 0 && revAvgs[i] > 0;
+                return `<td style="padding:10px 16px;text-align:center">
+                <span style="font-family:var(--mono);font-weight:700;font-size:11px;padding:3px 8px;border-radius:20px;background:${ok ? (diff > 0.2 ? "rgba(31,209,122,0.12)" : diff < -0.2 ? "rgba(255,77,94,0.12)" : "var(--s3)") : "var(--s3)"};color:${ok ? (diff > 0.2 ? "var(--green)" : diff < -0.2 ? "var(--red)" : "var(--muted)") : "var(--muted)"}">
+                  ${ok ? (diff > 0 ? "+" : "") + diff.toFixed(1) : "—"}
+                </span>
+              </td>`;
+              })
+              .join("")}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+        setTimeout(() => {
+          const ctx = document
+            .getElementById("teamRadarCanvas")
+            .getContext("2d");
+          teamRadar = new Chart(ctx, {
+            type: "radar",
+            data: {
+              labels: MEMBERS.arian.kpis.map((k) => k.en),
+              datasets: mems.map((m) => ({
+                label: m.name,
+                data: state[currentMonth][m.id][rKey].stars.map((s) => s || 0),
+                backgroundColor: m.color + "18",
+                borderColor: m.color,
+                borderWidth: 2,
+                pointBackgroundColor: m.color,
+                pointRadius: 4,
+              })),
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: true,
+                  labels: {
+                    color: "#EAF0FF",
+                    font: { family: "Syne", size: 11 },
+                  },
+                },
+              },
+              scales: {
+                r: {
+                  min: 0,
+                  max: 5,
+                  ticks: { display: false, stepSize: 1 },
+                  grid: { color: "rgba(255,255,255,0.05)" },
+                  angleLines: { color: "rgba(255,255,255,0.07)" },
+                  pointLabels: { color: "#6B7A99", font: { size: 10 } },
+                },
+              },
+            },
+          });
+        }, 50);
+      }
+
+      /* ═══════════════ HISTORY ═══════════════ */
+      function renderHistory(container) {
+        const rKey = currentRole === "hamid" ? "reviewHamid" : "reviewMotab";
+        const pastMonths = MONTHS.filter((m) => m <= currentMonth)
+          .slice()
+          .reverse();
+        const mems = Object.values(MEMBERS);
+
+        let rows = "";
+        pastMonths.forEach((month, idx) => {
+          const revAvgs = mems.map((m) =>
+            calcAvg(state[month][m.id][rKey].stars),
+          );
+          const teamAvg = avg(revAvgs.filter((a) => a > 0));
+
+          let trend = "—",
+            tClass = "trend-fl";
+          if (idx < pastMonths.length - 1) {
+            const prev = pastMonths[idx + 1];
+            const prevAvgs = mems.map((m) =>
+              calcAvg(state[prev][m.id][rKey].stars),
+            );
+            const prevTeam = avg(prevAvgs.filter((a) => a > 0));
+            const diff = teamAvg - prevTeam;
+            if (diff > 0.1) {
+              trend = `↑ +${diff.toFixed(1)}`;
+              tClass = "trend-up";
+            } else if (diff < -0.1) {
+              trend = `↓ ${diff.toFixed(1)}`;
+              tClass = "trend-dn";
+            } else {
+              trend = "→ flat";
+              tClass = "trend-fl";
+            }
+          }
+
+          rows += `<tr>
+      <td style="text-align:right;font-weight:700;color:var(--white)">${MONTH_LABELS[month]}</td>
+      ${mems
+        .map(
+          (m, i) => `
+        <td style="color:${m.color};font-weight:700">
+          ${revAvgs[i] > 0 ? revAvgs[i].toFixed(1) + " " + starsStr(Math.round(revAvgs[i])).slice(0, 5) : "—"}
+        </td>`,
+        )
+        .join("")}
+      <td style="color:var(--gold);font-weight:800">${teamAvg > 0 ? teamAvg.toFixed(1) : "—"}</td>
+      <td class="${tClass}" style="font-weight:700">${trend}</td>
+    </tr>`;
+        });
+
+        container.innerHTML = `
+    <div class="section-label">Score History — Your Ratings</div>
+    <div class="history-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:right">Month</th>
+            ${mems.map((m) => `<th style="color:${m.color}">${m.name}</th>`).join("")}
+            <th style="color:var(--gold)">Team Avg</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+      }
+
+      /* ═══════════════ HELPERS ═══════════════ */
+      function calcAvg(arr) {
+        const r = arr.filter((s) => s > 0);
+        return r.length ? r.reduce((a, b) => a + b, 0) / r.length : 0;
+      }
+      function avg(arr) {
+        return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+      }
+      function starsStr(n) {
+        return "★".repeat(Math.max(0, n)) + "☆".repeat(Math.max(0, 5 - n));
+      }
+      function getBadge(v) {
+        if (v >= 4.5) return '<span class="badge badge-ex">★ Excellent</span>';
+        if (v >= 3.5) return '<span class="badge badge-good">✓ Good</span>';
+        if (v >= 2.5) return '<span class="badge badge-avg">~ Average</span>';
+        if (v > 0) return '<span class="badge badge-low">↓ Needs Work</span>';
+        return '<span class="badge" style="background:var(--s3);color:var(--muted)">Not Rated</span>';
+      }
+
+      /* ═══════════════ BOOT ═══════════════ */
+      initState();
+      document.getElementById("currentMonthLabel").textContent =
+        MONTH_LABELS[currentMonth];
+    </script>
+  </body>
+</html>
